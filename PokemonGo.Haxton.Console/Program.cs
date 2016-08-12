@@ -37,12 +37,7 @@ namespace PokemonGo.Haxton.Console
             //System.Console.WriteLine("A token is a paid service where you can request more pokemon per hour.");
             //System.Console.Write("Token: ");
             //var token = System.Console.ReadLine();
-            System.Console.WriteLine("Welcome to open beta of Haxton bot.");
-            System.Console.WriteLine("Open beta will commence for 2 days, then after suggestions and input we will be going down for a short peroid and brought back up.");
-            System.Console.WriteLine("Currently, everything is free and nothing costs money. Unfortunately, there are some costs that go along with maintaining a bot, therefore if donations do not offset these costs, the bot may go 'freemium', I wouldn't like that, I want to keep it free.");
-            System.Console.WriteLine("If you have a few dollars, please consider donating, this bot is written by 1 person, not the 20 that others are.");
-            System.Console.WriteLine("Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Y6MMSS79F2WLG");
-            System.Console.WriteLine("Discord: https://discord.gg/Xt5JnHS");
+            System.Console.WriteLine("Welcome to Haxton Bot.");
             Thread.Sleep(2500);
             _cancelTokenSource = new CancellationTokenSource();
             ShouldRun = true;

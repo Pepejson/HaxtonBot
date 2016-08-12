@@ -36,7 +36,7 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
             _baseRpc = baseRpc;
             _client = client;
 
-            Task.Run(SendPokemon);
+            //Task.Run(SendPokemon);
             Task.Run(UpdateCanGetMap);
         }
 
@@ -49,17 +49,17 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
             }
         }
 
-        private RestClient Rc { get; } = new RestClient("http://haxton.io/");
+        //private RestClient Rc { get; } = new RestClient("http://5.135.218.27:3000/");
         private List<MapPokemon> _pokemons = new List<MapPokemon>();
         private List<FortData> _pokestops = new List<FortData>();
         public List<string> EncounterSpawnList { get; } = new List<string>();
 
-        private async Task SendPokemon()
+        /*private async Task SendPokemon()
         {
             while (true)
             {
                 var listToSend = _pokemons.Where(t => !EncounterSpawnList.Contains(t.EncounterId + t.SpawnPointId));
-                var request = new RestRequest("api/pokemon", Method.POST);
+                var request = new RestRequest("api/com.pokemon.go/login", Method.POST);
                 var removeList = listToSend.ToList();
                 EncounterSpawnList.AddRange(removeList.Select(t => t.EncounterId + t.SpawnPointId));
                 if (removeList.Count != 0)
@@ -75,7 +75,7 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
                 }
                 await Task.Delay(15000);
             }
-        }
+        }*/
 
         private bool CanGetMap { get; set; }
 
@@ -131,29 +131,29 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
             var response = await _baseRpc.PostProtoPayload<Request, GetMapObjectsResponse, GetHatchedEggsResponse, GetInventoryResponse, CheckAwardedBadgesResponse, DownloadSettingsResponse>(request);
             _pokemons.AddRange(response.Item1.MapCells.SelectMany(x => x.CatchablePokemons));
 
-            //var pokestops = response.Item1.MapCells.SelectMany(t => t.Forts).Where(x => x.Type == FortType.Checkpoint);
-            //_pokestops.AddRange(pokestops);
-            //var newMapObjects = response.MapCells.SelectMany(x => x.WildPokemons).Select(t => new MapPokemon()
-            //{
-            //    EncounterId = t.EncounterId,
-            //    ExpirationTimestampMs = t.TimeTillHiddenMs,
-            //    Latitude = t.Latitude,
-            //    Longitude = t.Longitude,
-            //    PokemonId = t.PokemonData.PokemonId,
-            //    SpawnPointId = t.SpawnPointId
-            //});
-            //_pokemons.AddRange(newMapObjects);
-            //var lurePokemon =
-            //    response.MapCells.SelectMany(f => f.Forts).Where(t => t.LureInfo != null).Select(l => new MapPokemon()
-            //    {
-            //        EncounterId = l.LureInfo.EncounterId,
-            //        ExpirationTimestampMs = l.LureInfo.LureExpiresTimestampMs,
-            //        Latitude = l.Latitude,
-            //        Longitude = l.Longitude,
-            //        PokemonId = l.LureInfo.ActivePokemonId,
-            //        SpawnPointId = l.Id
-            //    });
-            //_pokemons.AddRange(lurePokemon);
+            var pokestops = response.Item1.MapCells.SelectMany(t => t.Forts).Where(x => x.Type == FortType.Checkpoint);
+            _pokestops.AddRange(pokestops);
+            var newMapObjects = response.Item1.MapCells.SelectMany(x => x.WildPokemons).Select(t => new MapPokemon()
+            {
+                EncounterId = t.EncounterId,
+                ExpirationTimestampMs = t.TimeTillHiddenMs,
+                Latitude = t.Latitude,
+                Longitude = t.Longitude,
+                PokemonId = t.PokemonData.PokemonId,
+                SpawnPointId = t.SpawnPointId
+            });
+            _pokemons.AddRange(newMapObjects);
+            var lurePokemon =
+                response.Item1.MapCells.SelectMany(f => f.Forts).Where(t => t.LureInfo != null).Select(l => new MapPokemon()
+                {
+                    EncounterId = l.LureInfo.EncounterId,
+                    ExpirationTimestampMs = l.LureInfo.LureExpiresTimestampMs,
+                    Latitude = l.Latitude,
+                    Longitude = l.Longitude,
+                    PokemonId = l.LureInfo.ActivePokemonId,
+                    SpawnPointId = l.Id
+                });
+            _pokemons.AddRange(lurePokemon);
             _pokemons = _pokemons.Where(t => t.ExpirationTimestampMs > DateTime.UtcNow.ToUnixTime()).ToList();
             return response;
         }

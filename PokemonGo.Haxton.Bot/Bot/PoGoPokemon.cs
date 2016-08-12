@@ -33,11 +33,9 @@ namespace PokemonGo.Haxton.Bot.Bot
 
         Task EncounterLurePokemonAndCatch(FortData pokestop);
 
-        Task<IEnumerable<Action>> EncounterPokemon(IEnumerable<MapPokemon> pokemon);
+        Task<IEnumerable<Func<bool>>> EncounterPokemon(IEnumerable<MapPokemon> pokemon);
 
         Task<IEnumerable<MapPokemon>> PokemonToCatch(IEnumerable<MapPokemon> foundPokemon);
-
-        IEnumerable<MapPokemon> CloudPokemon(int count);
     }
 
     public class PoGoPokemon : IPoGoPokemon
@@ -56,14 +54,14 @@ namespace PokemonGo.Haxton.Bot.Bot
             _logicSettings = logicSettings;
         }
 
-        private RestClient Rc { get; } = new RestClient("http://haxton.io/");
-        private readonly List<string> _foundPokemonAlready = new List<string>();
+        //private RestClient Rc { get; } = new RestClient("http://5.135.218.27:3000/");
+        //private readonly List<string> _foundPokemonAlready = new List<string>();
 
-        public IEnumerable<MapPokemon> CloudPokemon(int take)
+       /* public IEnumerable<MapPokemon> CloudPokemon(int take)
         {
             var cloudPokemon = new List<MapPokemon>();
 
-            var request = new RestRequest($"api/pokemon", Method.GET);
+            var request = new RestRequest($"api/com.pokemon.go/nearby", Method.GET);
             var response = Rc.Execute(request);
             if (response.Content.Length > 2)
             {
@@ -95,7 +93,7 @@ namespace PokemonGo.Haxton.Bot.Bot
             _foundPokemonAlready.AddRange(catchableCloud.Select(t => t.EncounterId + t.SpawnPointId));
 
             return catchableCloud;
-        }
+        }*/
 
         public async Task<IEnumerable<MapPokemon>> GetPokemon()
         {
@@ -110,7 +108,7 @@ namespace PokemonGo.Haxton.Bot.Bot
                             .DistinctBy(x => x.SpawnPointId);
         }
 
-        public async Task EncounterPokemonAndCatch(IEnumerable<MapPokemon> pokemon)
+        /*public async Task EncounterPokemonAndCatch(IEnumerable<MapPokemon> pokemon)
         {
             var lat = _navigation.CurrentLatitude;
             var lng = _navigation.CurrentLongitude;
@@ -147,6 +145,29 @@ namespace PokemonGo.Haxton.Bot.Bot
                     logger.Warn($"Encounter failed with reason : {encounter.Status}");
                 }
             }
+        }*/
+
+        public async Task EncounterPokemonAndCatch(IEnumerable<MapPokemon> pokemon)
+        {
+            foreach (var mapPokemon in pokemon)
+            {
+                if (_logicSettings.UsePokemonToNotCatchFilter && _logicSettings.PokemonsNotToCatch.Contains(mapPokemon.PokemonId))
+                {
+                    continue;
+                }
+                var encounter = await _encounter.EncounterPokemonAsync(mapPokemon);
+                if (encounter.Status == EncounterResponse.Types.Status.EncounterSuccess)
+                {
+                    try
+                    {
+                        await _encounter.CatchPokemon(encounter, mapPokemon);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error(ex, "Unable to catch pokemon");
+                    }
+                }
+            }
         }
 
         public async Task<Func<bool>> EncounterLurePokemon(FortData pokestop)
@@ -181,7 +202,7 @@ namespace PokemonGo.Haxton.Bot.Bot
             }
         }
 
-        public async Task<IEnumerable<Action>> EncounterPokemon(IEnumerable<MapPokemon> pokemon)
+        /*public async Task<IEnumerable<Action>> EncounterPokemon(IEnumerable<MapPokemon> pokemon)
         {
             var actionList = new List<Action>();
             foreach (var mapPokemon in pokemon)
@@ -208,6 +229,36 @@ namespace PokemonGo.Haxton.Bot.Bot
                 else
                 {
                     logger.Warn($"Encounter failed with reason : {encounter.Status}");
+                }
+            }
+            return actionList;
+        }*/
+
+        public async Task<IEnumerable<Func<bool>>> EncounterPokemon(IEnumerable<MapPokemon> pokemon)
+        {
+            var actionList = new List<Func<bool>>();
+            foreach (var mapPokemon in pokemon)
+            {
+                if (_logicSettings.UsePokemonToNotCatchFilter && _logicSettings.PokemonsNotToCatch.Contains(mapPokemon.PokemonId))
+                {
+                    continue;
+                }
+                var encounter = await _encounter.EncounterPokemonAsync(mapPokemon);
+                if (encounter.Status == EncounterResponse.Types.Status.EncounterSuccess)
+                {
+                    actionList.Add(() =>
+                    {
+                        try
+                        {
+                            return _encounter.CatchPokemon(encounter, mapPokemon).GetAwaiter().GetResult().Status ==
+                                   CatchPokemonResponse.Types.CatchStatus.CatchError;
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Error(ex, "Unable to catch pokemon");
+                        }
+                        return false;
+                    });
                 }
             }
             return actionList;

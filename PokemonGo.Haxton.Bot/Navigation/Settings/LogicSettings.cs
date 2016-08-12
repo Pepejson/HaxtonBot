@@ -30,25 +30,25 @@ namespace PokemonGo.Haxton.Bot.Settings
             PokemonsToEvolve = GetPokemon("./UserSettings/PokemonToEvolve.cfg");
             PokemonsNotToTransfer = GetPokemon("./UserSettings/PokemonToKeep.cfg");
             PokemonsNotToCatch = GetPokemon("./UserSettings/PokemonToAvoid.cfg");
-            //LocationsToVisit = GetLocations("./UserSettings/LocationsToCycle.cfg");
+            LocationsToVisit = GetLocations("./UserSettings/LocationsToCycle.cfg");
             BurstMode = Convert.ToBoolean(ConfigurationManager.AppSettings["UseBurstMode"]);
             //
         }
 
-        //private IEnumerable<KeyValuePair<double, double>> GetLocations(string usersettingsLocationstocycleCfg)
-        //{
-        //    var list = new List<KeyValuePair<double, double>>();
-        //    var text = File.ReadLines(usersettingsLocationstocycleCfg);
-        //    foreach (var s in text)
-        //    {
-        //        var splitLines = s.Split(',');
-        //        var x = double.Parse(splitLines[0], CultureInfo.InvariantCulture);
-        //        var y = double.Parse(splitLines[1], CultureInfo.InvariantCulture);
-        //        var kvp = new KeyValuePair<double, double>(x, y);
-        //        list.Add(kvp);
-        //    }
-        //    return list;
-        //}
+        private IEnumerable<KeyValuePair<double, double>> GetLocations(string usersettingsLocationstocycleCfg)
+        {
+            var list = new List<KeyValuePair<double, double>>();
+            var text = File.ReadLines(usersettingsLocationstocycleCfg);
+            foreach (var s in text)
+            {
+                var splitLines = s.Split(',');
+                var x = double.Parse(splitLines[0], CultureInfo.InvariantCulture);
+                var y = double.Parse(splitLines[1], CultureInfo.InvariantCulture);
+                var kvp = new KeyValuePair<double, double>(x, y);
+                list.Add(kvp);
+            }
+            return list;
+        }
 
         public IEnumerable<KeyValuePair<double, double>> LocationsToVisit { get; }
 
