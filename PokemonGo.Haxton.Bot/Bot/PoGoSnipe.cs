@@ -43,7 +43,6 @@ namespace PokemonGo.Haxton.Bot.Bot
         {
             SnipeLocations.Add(new KeyValuePair<double, double>(x, y));
         }
-
         public async Task DoSnipe()
         {
             try
@@ -57,6 +56,7 @@ namespace PokemonGo.Haxton.Bot.Bot
                 foreach (var act in funcs)
                 {
                     act.Invoke();
+                    await Task.Delay(1500);
                 }
             }
             catch (ArgumentException)
@@ -65,8 +65,8 @@ namespace PokemonGo.Haxton.Bot.Bot
             }
         }
 
-        public bool HasSnipeLocation => SnipeLocations.IsEmpty == false;
 
+        public bool HasSnipeLocation => SnipeLocations.IsEmpty == false;
         public KeyValuePair<double, double> GetNextSnipeLocation
         {
             get

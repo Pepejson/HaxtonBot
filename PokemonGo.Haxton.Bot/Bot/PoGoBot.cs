@@ -59,7 +59,7 @@ namespace PokemonGo.Haxton.Bot.Bot
             _settings = settings;
 
             LuckyEggUsed = DateTime.MinValue;
-            _pokestops = new List<FortData>(_pokestop.Pokestops.ToList());
+            //_pokestops = new List<FortData>(_pokestop.Pokestops.ToList());
 
             ShouldTransferPokemon = _settings.TransferDuplicatePokemon;
             ShouldEvolvePokemon = _settings.EvolveAllPokemonWithEnoughCandy || _settings.EvolveAllPokemonAboveIv;
@@ -78,81 +78,36 @@ namespace PokemonGo.Haxton.Bot.Bot
                 Task
                     .Run(TransferDuplicatePokemon, _token),
                 Task
-                    .Run(FarmPokestopsTask, _token),
-                Task.Run(UpdatePokestops, _token)
-        };
+                    .Run(FarmPokestopsTask, _token)
+            };
 
             return taskList;
         }
 
-        private List<FortData> _pokestops;
-
-        private async Task UpdatePokestops()
-        {
-            while (true)
-            {
-                var newPokestops = _pokestop.Pokestops.ToList();
-                lock (_pokestops)
-                    if (newPokestops.Count > 0)
-                        _pokestops = new List<FortData>(newPokestops);
-                await Task.Delay(5000, _token);
-            }
-        }
-
         private async Task FarmPokestops()
         {
-            if (!_pokestops.Any())
+            var pokestops = _pokestop.Pokestops.ToList();
+            if (!pokestops.Any())
                 return;
-
-            var forts = BestForts(_pokestops);
-            foreach (var fortData in forts)
+            var pokestop = pokestops.Where(x => x.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime()).OrderBy(i =>
+                LocationUtils.CalculateDistanceInMeters(_navigation.CurrentLatitude,
+                    _navigation.CurrentLongitude, i.Latitude, i.Longitude)).First();
+            var distance = LocationUtils.CalculateDistanceInMeters(_navigation.CurrentLatitude,
+                _navigation.CurrentLongitude, pokestop.Latitude, pokestop.Longitude);
+            if (distance > 100)
             {
-                await _navigation.Move(fortData, () => { });
-                await _pokestop.Search(fortData);
-                _pokestops.Remove(fortData);
+                var lurePokestop = pokestops.FirstOrDefault(x => x.LureInfo != null);
+                if (lurePokestop != null)
+                    pokestop = lurePokestop;
             }
-
+            await _navigation.Move(pokestop, async () => await _ash.CatchEmAll());
+            await _pokestop.Search(pokestop);
             if (_snipe.SnipeLocations.Count > 0)
             {
                 await _snipe.DoSnipe();
                 return;
             }
-            await _ash.CatchEmAll();
-
-            //var pokestop = _pokestops.Where(x => x.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime()).OrderBy(i =>
-            //    LocationUtils.CalculateDistanceInMeters(_navigation.CurrentLatitude, _navigation.CurrentLongitude, i.Latitude, i.Longitude)).First();
-            //var distance = LocationUtils.CalculateDistanceInMeters(_navigation.CurrentLatitude, _navigation.CurrentLongitude, pokestop.Latitude, pokestop.Longitude);
-            //if (distance > 100)
-            //{
-            //    var r = new Random((int)DateTime.UtcNow.Ticks);
-            //    var lurePokestop = _pokestops.ElementAtOrDefault(r.Next(_pokestops.Count));
-            //    if (lurePokestop != null)
-            //        pokestop = lurePokestop;
-            //}
-            //await _navigation.Move(pokestop, async () => await _ash.CatchEmAll());
-            //await _pokestop.Search(pokestop);
-
-            //await _ash.CatchEmAll(pokestop);
-            //_pokestops.Remove(pokestop);
-        }
-
-        private IOrderedEnumerable<FortData> BestForts(List<FortData> pokestops)
-        {
-            var fortList = new Dictionary<FortData, IOrderedEnumerable<FortData>>();
-            for (var i = 0; i < _pokestops.Count; i++)
-            {
-                fortList.Add(pokestops[i], FortByLocation(pokestops, pokestops[i].Latitude, pokestops[i].Longitude));
-            }
-            return fortList.OrderByDescending(t => t.Value.Count()).FirstOrDefault().Value;
-        }
-
-        private IOrderedEnumerable<FortData> FortByLocation(List<FortData> pokestops, double lat, double lng)
-        {
-            return pokestops
-                .Where(x => x.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime())
-                .Where(t => LocationUtils.CalculateDistanceInMeters(lat, lng, t.Latitude, t.Longitude) < 100)
-                .OrderBy(i => i.Longitude)
-                .ThenBy(i => i.Latitude);
+            await _ash.CatchEmAll(pokestop);
         }
 
         private async Task FarmPokestopsTask()
@@ -216,6 +171,7 @@ namespace PokemonGo.Haxton.Bot.Bot
             });
         }
 
+
         private async void LuckyEgg()
         {
             if (LuckyEggUsed.AddMinutes(30) < DateTime.Now)
@@ -226,10 +182,7 @@ namespace PokemonGo.Haxton.Bot.Bot
                 var luckyEgg = luckyEggs.FirstOrDefault();
 
                 if (luckyEgg == null || luckyEgg.Count <= 0)
-                {
-                    logger.Warn("No lucky eggs left. Could not use");
                     return;
-                }
                 LuckyEggUsed = DateTime.Now;
                 logger.Info($"Lucky egg used. {luckyEgg.Count} remaining");
                 await _inventory.UseLuckyEgg();

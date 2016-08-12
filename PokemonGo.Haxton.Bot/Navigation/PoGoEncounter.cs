@@ -31,22 +31,25 @@ namespace PokemonGo.Haxton.Bot.Navigation
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         private readonly IApiEncounter _apiEncounter;
+        private readonly IPoGoNavigation _navigation;
         private readonly IPoGoInventory _inventory;
         private readonly ILogicSettings _logicSettings;
 
-        public PoGoEncounter(IApiEncounter apiEncounter, IPoGoInventory inventory, ILogicSettings logicSettings)
+        private object lockObject = new object();
+        public PoGoEncounter(IApiEncounter apiEncounter, IPoGoNavigation navigation, IPoGoInventory inventory, ILogicSettings logicSettings)
         {
             _apiEncounter = apiEncounter;
+            _navigation = navigation;
             _inventory = inventory;
             _logicSettings = logicSettings;
         }
+
 
         public async Task<EncounterResponse> EncounterPokemonAsync(MapPokemon pokemon)
         {
             var encounter = await _apiEncounter.EncounterPokemon(pokemon.EncounterId, pokemon.SpawnPointId);
             return encounter;
         }
-
         public async Task<DiskEncounterResponse> EncounterPokemonLure(ulong encounterId, string fortId)
         {
             return await _apiEncounter.EncounterLurePokemon(encounterId, fortId);
@@ -60,15 +63,6 @@ namespace PokemonGo.Haxton.Bot.Navigation
             {
                 var probability = encounter?.CaptureProbability?.CaptureProbability_?.FirstOrDefault();
                 var pokeball = GetPokeball(encounter);
-                if (pokeball == ItemId.ItemUnknown)
-                {
-                    logger.Error("Catch failed due to no pokeballs.");
-                    return new CatchPokemonResponse();
-                }
-                else
-                {
-                    _inventory.PokeballsDictionary[pokeball] = _inventory.PokeballsDictionary[pokeball] - 1;
-                }
 
                 caughtPokemonResponse =
                     await _apiEncounter.CatchPokemon(encounterId, id, pokeball);
@@ -91,14 +85,7 @@ namespace PokemonGo.Haxton.Bot.Navigation
 
                 var pokeball = GetPokeball(encounter);
                 if (pokeball == ItemId.ItemUnknown)
-                {
-                    logger.Error("Catch failed due to no pokeballs.");
                     return new CatchPokemonResponse();
-                }
-                else
-                {
-                    _inventory.PokeballsDictionary[pokeball] = _inventory.PokeballsDictionary[pokeball] - 1;
-                }
                 var isLowProbability = probability.HasValue && probability.Value < 0.35;
                 var isHighCp = encounter != null && encounter.WildPokemon?.PokemonData?.Cp > 400;
                 var isHighPerfection = PokemonInfo.CalculatePokemonPerfection(encounter?.WildPokemon?.PokemonData) >= _logicSettings.KeepMinIvPercentage;

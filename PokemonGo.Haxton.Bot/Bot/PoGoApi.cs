@@ -15,7 +15,6 @@ namespace PokemonGo.Haxton.Bot.Bot
     public class PoGoApi
     {
         public string Token { get; set; }
-        private RestClient Rc { get; } = new RestClient("http://5.135.218.27:3000/");
 
         public PoGoApi(string token)
         {

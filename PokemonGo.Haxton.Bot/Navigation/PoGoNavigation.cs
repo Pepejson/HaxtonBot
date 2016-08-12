@@ -23,7 +23,8 @@ namespace PokemonGo.Haxton.Bot.Navigation
 
         Task TeleportToPokestop(FortData closestPokestop);
 
-        Task<PlayerUpdateResponse> TeleportToLocation(double lat, double longitude);
+        //Task<PlayerUpdateResponse> TeleportToLocation(double lat, double longitude);
+        Task TeleportToLocation(double lat, double longitude);
 
         Task Move(FortData pokestop, Action action);
     }
@@ -63,7 +64,7 @@ namespace PokemonGo.Haxton.Bot.Navigation
 
             var sourceLocation = new GeoCoordinate(_client.CurrentLatitude, _client.CurrentLongitude);
             var distanceToTarget = LocationUtils.CalculateDistanceInMeters(sourceLocation, targetLocation);
-            //Logger.Write($"Distance to target location: {distanceToTarget:0.##} meters. Will take {distanceToTarget/speedInMetersPerSecond:0.##} seconds!", LogLevel.Info);
+            // Logger.Write($"Distance to target location: {distanceToTarget:0.##} meters. Will take {distanceToTarget/speedInMetersPerSecond:0.##} seconds!", LogLevel.Info);
 
             var nextWaypointBearing = LocationUtils.DegreeBearing(sourceLocation, targetLocation);
             var nextWaypointDistance = speedInMetersPerSecond;
@@ -123,7 +124,7 @@ namespace PokemonGo.Haxton.Bot.Navigation
 
             var sourceLocation = new GeoCoordinate(_client.CurrentLatitude, _client.CurrentLongitude);
             var distanceToTarget = LocationUtils.CalculateDistanceInMeters(sourceLocation, targetLocation);
-            //Logger.Write($"Distance to target location: {distanceToTarget:0.##} meters. Will take {distanceToTarget/speedInMetersPerSecond:0.##} seconds!", LogLevel.Info);
+            // Logger.Write($"Distance to target location: {distanceToTarget:0.##} meters. Will take {distanceToTarget/speedInMetersPerSecond:0.##} seconds!", LogLevel.Info);
 
             var nextWaypointBearing = LocationUtils.DegreeBearing(sourceLocation, targetLocation);
             var nextWaypointDistance = speedInMetersPerSecond;
@@ -170,9 +171,9 @@ namespace PokemonGo.Haxton.Bot.Navigation
             await _player.UpdatePlayerLocation(closestPokestop.Latitude, closestPokestop.Longitude, _settings.DefaultAltitude);
         }
 
-        public async Task<PlayerUpdateResponse> TeleportToLocation(double lat, double longitude)
+        public async Task TeleportToLocation(double lat, double longitude)
         {
-            return await _player.UpdatePlayerLocation(lat, longitude, _settings.DefaultAltitude);
+            await _player.UpdatePlayerLocation(lat, longitude, _settings.DefaultAltitude);
         }
 
         public async Task Move(FortData pokestop, Action action)

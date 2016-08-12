@@ -49,33 +49,9 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
             }
         }
 
-        //private RestClient Rc { get; } = new RestClient("http://5.135.218.27:3000/");
         private List<MapPokemon> _pokemons = new List<MapPokemon>();
         private List<FortData> _pokestops = new List<FortData>();
         public List<string> EncounterSpawnList { get; } = new List<string>();
-
-        /*private async Task SendPokemon()
-        {
-            while (true)
-            {
-                var listToSend = _pokemons.Where(t => !EncounterSpawnList.Contains(t.EncounterId + t.SpawnPointId));
-                var request = new RestRequest("api/com.pokemon.go/login", Method.POST);
-                var removeList = listToSend.ToList();
-                EncounterSpawnList.AddRange(removeList.Select(t => t.EncounterId + t.SpawnPointId));
-                if (removeList.Count != 0)
-                {
-                    request.AddJsonBody(removeList.Select(x => new PokemonModel(x)));
-                    //request.RequestFormat = DataFormat.Json;
-                    //request.AddBody(JsonConvert.SerializeObject(removeList.Select(x => new PokemonModel(x))).Encrypt(""));
-                    foreach (var mapPokemon in removeList)
-                    {
-                        _pokemons.Remove(mapPokemon);
-                    }
-                    Rc.ExecuteAsync(request, response => { });
-                }
-                await Task.Delay(15000);
-            }
-        }*/
 
         private bool CanGetMap { get; set; }
 

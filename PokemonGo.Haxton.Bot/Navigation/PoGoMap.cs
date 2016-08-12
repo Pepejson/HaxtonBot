@@ -35,7 +35,6 @@ namespace PokemonGo.Haxton.Bot.Navigation
             _settings = settings;
             _logicSettings = logicSettings;
         }
-
         public async Task<IOrderedEnumerable<FortData>> GetFortWithPokemon()
         {
             var mapObjects = await _map.GetMapObjects();
@@ -51,7 +50,7 @@ namespace PokemonGo.Haxton.Bot.Navigation
                     i =>
                         i.Type == FortType.Checkpoint &&
                         i.CooldownCompleteTimestampMs < DateTime.UtcNow.ToUnixTime() &&
-                        (  //Make sure PokeStop is within max travel distance, unless it's set to 0.
+                        ( // Make sure PokeStop is within max travel distance, unless it's set to 0.
                             LocationUtils.CalculateDistanceInMeters(
                                 _settings.DefaultLatitude, _settings.DefaultLongitude,
                                 i.Latitude, i.Longitude) < _logicSettings.MaxTravelDistanceInMeters) ||
@@ -65,13 +64,13 @@ namespace PokemonGo.Haxton.Bot.Navigation
         {
             var mapObjects = await _map.GetMapObjects();
             var catchable = mapObjects.Item1.MapCells.SelectMany(i => i.CatchablePokemons).ToList();
-            var wild = mapObjects.Item1.MapCells.SelectMany(x => x.WildPokemons).Select(x => new MapPokemon()
-            {
-                EncounterId = x.EncounterId,
-                SpawnPointId = x.SpawnPointId,
-                PokemonId = x.PokemonData.PokemonId
-            });
-            catchable.AddRange(wild);
+            //var wild = mapObjects.MapCells.SelectMany(x => x.WildPokemons).Select(x => new MapPokemon()
+            //{
+            //    EncounterId = x.EncounterId,
+            //    SpawnPointId = x.SpawnPointId,
+            //    PokemonId = x.PokemonData.PokemonId
+            //});
+            //catchable.AddRange(wild);
             return
                 catchable.OrderBy(t =>
                         LocationUtils.CalculateDistanceInMeters(_navigation.CurrentLatitude, _navigation.CurrentLongitude, t.Latitude, t.Longitude));
