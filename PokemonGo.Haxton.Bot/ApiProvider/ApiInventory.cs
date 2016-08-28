@@ -34,7 +34,7 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
 
         Task<NicknamePokemonResponse> NicknamePokemon(ulong pokemonId, string nickName);
 
-        Task<SetFavoritePokemonResponse> SetFavoritePokemon(ulong pokemonId, bool isFavorite);
+        Task<SetFavoritePokemonResponse> SetFavoritePokemon(long pokemonId, bool isFavorite);
     }
 
     public class ApiInventory : IApiInventory
@@ -176,7 +176,7 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
             return await _baseRpc.PostProtoPayload<Request, NicknamePokemonResponse>(RequestType.NicknamePokemon, message);
         }
 
-        public async Task<SetFavoritePokemonResponse> SetFavoritePokemon(ulong pokemonId, bool isFavorite)
+        public async Task<SetFavoritePokemonResponse> SetFavoritePokemon(long pokemonId, bool isFavorite)
         {
             var message = new SetFavoritePokemonMessage()
             {

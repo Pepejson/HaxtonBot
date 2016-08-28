@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using POGOProtos.Enums;
+﻿using System.Threading.Tasks;
 using POGOProtos.Inventory.Item;
 using POGOProtos.Networking.Requests;
 using POGOProtos.Networking.Requests.Messages;
@@ -100,7 +95,7 @@ namespace PokemonGo.RocketAPI.Rpc
             return await PostProtoPayload<Request, UseItemPotionResponse>(RequestType.UseItemPotion, message);
         }
 
-        public async Task<UseItemEggIncubatorResponse> UseItemRevive(ItemId itemId, ulong pokemonId)
+        public async Task<UseItemReviveResponse> UseItemRevive(ItemId itemId, ulong pokemonId)
         {
             var message = new UseItemReviveMessage()
             {
@@ -108,7 +103,7 @@ namespace PokemonGo.RocketAPI.Rpc
                 PokemonId = pokemonId
             };
 
-            return await PostProtoPayload<Request, UseItemEggIncubatorResponse>(RequestType.UseItemEggIncubator, message);
+            return await PostProtoPayload<Request, UseItemReviveResponse>(RequestType.UseItemRevive, message);
         }
 
         public async Task<UseIncenseResponse> UseIncense(ItemId incenseType)
@@ -149,7 +144,7 @@ namespace PokemonGo.RocketAPI.Rpc
         {
             var message = new SetFavoritePokemonMessage()
             {
-                PokemonId = pokemonId,
+                PokemonId = (long)pokemonId,
                 IsFavorite = isFavorite
             };
 

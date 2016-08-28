@@ -67,7 +67,7 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
         {
             _client = client;
             _settings = settings;
-            _pokemonHttpClient = new PokemonHttpClient(settings.Proxy);
+            //_pokemonHttpClient = new PokemonHttpClient(settings.Proxy);
         }
 
         public async Task<TResponsePayload> PostProtoPayload<TRequest, TResponsePayload>(RequestType type, IMessage message) where TRequest : IMessage<TRequest>

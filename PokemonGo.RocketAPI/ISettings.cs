@@ -4,15 +4,15 @@ namespace PokemonGo.RocketAPI
 {
     public interface ISettings
     {
-        AuthType AuthType { get; }
-        double DefaultLatitude { get; }
-        double DefaultLongitude { get; }
-        double DefaultAltitude { get; }
-        string GoogleRefreshToken { get; }
-        string PtcPassword { get; }
-        string PtcUsername { get; }
-        string GoogleUsername { get; }
-        string GooglePassword { get; }
+        AuthType AuthType { get; set; }
+        double DefaultLatitude { get; set; }
+        double DefaultLongitude { get; set; }
+        double DefaultAltitude { get; set; }
+        string GoogleRefreshToken { get; set; }
+        string PtcPassword { get; set; }
+        string PtcUsername { get; set; }
+        string GoogleUsername { get; set; }
+        string GooglePassword { get; set; }
         string DeviceId { get; set; }
         string AndroidBoardName { get; set; }
         string AndroidBootloader { get; set; }
@@ -26,7 +26,11 @@ namespace PokemonGo.RocketAPI
         string FirmwareTags { get; set; }
         string FirmwareType { get; set; }
         string FirmwareFingerprint { get; set; }
-        string ApiUrl { get; set; }
-        string Proxy { get; set; }
+        bool UseProxy { get; set; }
+        bool UseProxyAuthentication { get; set; }
+        string UseProxyHost { get; set; }
+        string UseProxyPort { get; set; }
+        string UseProxyUsername { get; set; }
+        string UseProxyPassword { get; set; }
     }
 }

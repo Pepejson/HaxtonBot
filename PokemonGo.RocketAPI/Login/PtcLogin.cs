@@ -8,15 +8,17 @@ using System.Web;
 
 namespace PokemonGo.RocketAPI.Login
 {
-    public class PtcLogin : ILoginType
+    class PtcLogin : ILoginType
     {
-        private readonly string password;
-        private readonly string username;
+        readonly string password;
+        readonly string username;
+        readonly ISettings _settings;
 
-        public PtcLogin(string username, string password)
+        public PtcLogin(string username, string password, ISettings settings)
         {
             this.username = username;
             this.password = password;
+            this._settings = settings;
         }
 
         public async Task<string> GetAccessToken()
@@ -24,7 +26,9 @@ namespace PokemonGo.RocketAPI.Login
             var handler = new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip,
-                AllowAutoRedirect = false
+                AllowAutoRedirect = false,
+                UseProxy = Client.Proxy != null,
+                Proxy = Client.Proxy
             };
 
             using (var tempHttpClient = new System.Net.Http.HttpClient(handler))
@@ -36,11 +40,13 @@ namespace PokemonGo.RocketAPI.Login
                 var ticketId = await GetLoginTicket(username, password, tempHttpClient, sessionData).ConfigureAwait(false);
 
                 //Get tokenvar
-                return await GetToken(tempHttpClient, ticketId).ConfigureAwait(false);
+                var authToken = await GetToken(tempHttpClient, ticketId).ConfigureAwait(false);
+                if (authToken == null) throw new PtcOfflineException();
+                return authToken;
             }
         }
 
-        private static string ExtracktTicketFromResponse(HttpResponseMessage loginResp)
+        private static string ExtractTicketFromResponse(HttpResponseMessage loginResp)
         {
             var location = loginResp.Headers.Location;
             if (location == null)
@@ -83,7 +89,7 @@ namespace PokemonGo.RocketAPI.Login
                 loginResp = await tempHttpClient.PostAsync(Resources.PtcLoginUrl, formUrlEncodedContent).ConfigureAwait(false);
             }
 
-            var ticketId = ExtracktTicketFromResponse(loginResp);
+            var ticketId = ExtractTicketFromResponse(loginResp);
             return ticketId;
         }
 

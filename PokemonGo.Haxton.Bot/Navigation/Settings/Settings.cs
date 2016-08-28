@@ -24,10 +24,10 @@ namespace PokemonGo.Haxton.Bot.Settings
             Proxy = ConfigurationManager.AppSettings["Proxy"];
         }
 
-        public AuthType AuthType { get; }
-        public double DefaultLatitude { get; }
-        public double DefaultLongitude { get; }
-        public double DefaultAltitude { get; }
+        public AuthType AuthType { get; set; }
+        public double DefaultLatitude { get; set; }
+        public double DefaultLongitude { get; set; }
+        public double DefaultAltitude { get; set; }
 
         private string _googleRefreshToken;
 
@@ -62,11 +62,17 @@ namespace PokemonGo.Haxton.Bot.Settings
         public string FirmwareType { get; set; }
         public string FirmwareFingerprint { get; set; }
 
-        public string PtcPassword { get; }
-        public string PtcUsername { get; }
-        public string GoogleUsername { get; }
-        public string GooglePassword { get; }
-        public string ApiUrl { get; set; }
+        public string PtcPassword { get; set; }
+        public string PtcUsername { get; set; }
+        public string GoogleUsername { get; set; }
+        public string GooglePassword { get; set; }
+        //public string ApiUrl { get; set; }
         public string Proxy { get; set; }
+        public bool UseProxy { get; set; }
+        public bool UseProxyAuthentication { get; set; }
+        public string UseProxyHost { get; set; }
+        public string UseProxyPort { get; set; }
+        public string UseProxyUsername { get; set; }
+        public string UseProxyPassword { get; set; }
     }
 }

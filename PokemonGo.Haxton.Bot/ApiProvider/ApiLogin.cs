@@ -19,7 +19,7 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
 
         Task DoGoogleLogin(string username, string password);
 
-        Task DoPtcLogin(string username, string password);
+        Task DoPtcLogin(string username, string password, ISettings settings);
     }
 
     public class ApiLogin : IApiLogin
@@ -60,9 +60,9 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
             await SetServer();
         }
 
-        public async Task DoPtcLogin(string username, string password)
+        public async Task DoPtcLogin(string username, string password, ISettings settings)
         {
-            var ptcLogin = new PtcLogin(username, password);
+            var ptcLogin = new PtcLogin(username, password, settings);
 
             _client.AuthToken = await ptcLogin.GetAccessToken();
             _client.AuthType = AuthType.Ptc;

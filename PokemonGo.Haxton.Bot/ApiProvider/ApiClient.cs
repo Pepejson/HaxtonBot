@@ -26,12 +26,13 @@ namespace PokemonGo.Haxton.Bot.ApiProvider
         public double CurrentAltitude { get; set; }
         public AuthType AuthType { get; set; }
 
-        public string ApiUrl
+        /*public string ApiUrl
         {
             get { return Settings.ApiUrl; }
             set { Settings.ApiUrl = value; }
-        }
+        }*/
 
+        public string ApiUrl { get; set; }
         public AuthTicket AuthTicket { get; set; }
         public string AuthToken { get; set; }
         public IApiFailureStrategy ApiFailure { get; set; }
